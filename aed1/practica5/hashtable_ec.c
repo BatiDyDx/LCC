@@ -122,3 +122,4 @@ void hashtable_resize(HashTable table) {
   free(tmp_elems);
   return;
 }
+

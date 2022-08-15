@@ -51,7 +51,12 @@ void bheap_remove(BHeap heap, void *data);
 void bheap_resize(BHeap heap);
 
 /*
- * Remove and return the max element of the heap while
+ * Returns a copy of the max element in the heap
+*/
+void* bheap_get_max(BHeap heap);
+
+/*
+ * Remove the max element in the heap while
  * preserving the structure
 */
 void* bheap_remove_max(BHeap heap);

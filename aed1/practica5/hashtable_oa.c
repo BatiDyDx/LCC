@@ -156,7 +156,7 @@ void hashtable_resize(HashTable table) {
   unsigned tmp_size = table->size;
   table->size *= 2;
   table->num_elems = 0;
-  table->elems = malloc(sizeof(HashBox) * table->size);
+  table->elems = calloc(table->size, sizeof(HashBox));
   assert(table->elems != NULL);
   
   for (unsigned i = 0; i < tmp_size; ++i) {
