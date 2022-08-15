@@ -1,0 +1,9 @@
+# Extra
+.DS_Store
+.vscode
+*/main
+*.dSYM
+
+# Proyectos separados
+aed1/huffman_codes
+aed1/spell_checker
