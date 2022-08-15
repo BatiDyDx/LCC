@@ -1,0 +1,10 @@
+DIMENSION
+10
+PALABRAS
+meteorizacion
+estamento
+razonar
+ahorrista
+trueno
+COMPLEJIDAD
+2
