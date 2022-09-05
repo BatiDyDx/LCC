@@ -43,8 +43,9 @@ void encode_xor() {
   printf("Inserte el codigo para la codificacion: ");
   scanf("%d", &code);
   printf("Mensaje codificado: \n");
-  while (*msg)
-    putchar(*msg++ ^ code);
+  int i = 0;
+  while (msg[i])
+    putchar(msg[i++] ^ code);
 }
 
 // Ejercicio 6

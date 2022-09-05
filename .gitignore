@@ -1,9 +1,19 @@
+# Las siguientes 3 lineas son para evitar incluir binarios
+# Ignorar todos
+*
+
+# Incluir todos los archivos con extension 
+!*.*
+
+# Incluir todos los directorios
+!*/
+
 # Extra
 .DS_Store
 .vscode
 __pycache__
-*main
 *.dSYM
+*a.out
 
 # Proyectos separados
 aed1/huffman_codes
