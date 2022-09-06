@@ -66,9 +66,86 @@ typedef struct {
 } uint_256bits;
 
 // a)
+int is_zero_256b(uint_256bits x) {
+  for (int i = 0; i < 16; i++)
+    if (x.n[i])
+	  return 0;
+  return 1;
+}
+
+int is_one_256b(uint_256bits x) {
+  int flag = 0;
+  for (int i = 16; i > 1 && !flag; --i)
+    if (x.n[i])
+	  flag = 1;
+  return !flag && (x.n[0] == 1);
+}
+
+int is_even_256b(uint_256bits x) {
+  return x.n[0] & 0;
+}
+
+uint_256bits shiftl(uint_256bits x, int n) {
+  uint_256bits y;
+
+  int block_size = sizeof(short) * 8;
+  int offset = n / block_size;
+  int nmod = n % block_size;
+
+  for (int i = 15; i >= 0; --i) {
+    if (i - offset < 0) {
+      y.n[i] = 0;
+	  continue;
+	}
+
+	y.n[i] = (x.n[i - offset] << nmod);
+	if (i - offset - 1 >= 0)
+	  y.n[i] = y.n[i] | x.n[i - offset - 1] >> (block_size - nmod);
+  }
+
+  return y;
+}
+
+uint_256bits rshift(uint_256bits x, int n) {
+  uint_256bits y;
+
+  int block_size = sizeof(short) * 8;
+  int offset = n / block_size;
+  int nmod = n % block_size;
+
+  for (int i = 0; i < 16; ++i) {
+    if (i + offset >= 16 ) {
+      y.n[i] = 0;
+	  continue;
+	}
+
+	y.n[i] = (x.n[i + offset] >> nmod);
+	if (i + offset + 1 <= 15)
+	  y.n[i] = y.n[i] | x.n[i + offset + 1] << (block_size - nmod);
+
+  return y;
+}
+
+uint_256bits add_256b(uint_256bits x, uint_256bits y) {
+  int carry = 0, tmp;
+  uint_256bits z;
+  for (int i = 0; i < 16; ++i) {
+    tmp = (unsigned) x.n[i] + (unsigned) y.n[i] + carry;
+	z.n[i] = (unsigned short) tmp;
+	carry = (tmp >> 16) & 1;
+  }
+
+  return z;
+}
+
+
+// Ejercicio 9
+#define MANT_F(X) (*( (int*) (X) ) & 0x007FFFFF) // Mantisa para float
+#define EXP_F(X) ((*( (int^*) (X)) >> 23) & 0x0000007F) // Exponente para float
 
 int main() {
   ex1();
-  printf("N: %d, N + N: %d\n", 0x80000000, 0x80000000 + 0x80000000);
+  uint_256bits x = { {1, } };
+  printf("%d\n", shiftl(x, 9).n[1]);
   return 0;
 }
