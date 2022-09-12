@@ -18,7 +18,7 @@ int is_one(long n, int b) {
   return (n >> b) & 1;
 }
 
-// Ejercicio 3
+// Ejercicio 3 
 void printbin(unsigned long n) {
   for (int i = sizeof(unsigned long) * 8; i > 0; i--)
     putchar(is_one(n, i - 1) ? '1' : '0');
@@ -26,12 +26,12 @@ void printbin(unsigned long n) {
 }
 
 // Ejercicio 4
-void swap3(int* a, int* b, int* c) {
-  //a->b, b->c, c->a
-  *a = *a ^ *b ^ *c;
-  *b = *a ^ *b ^ *c; // b = (a ^ b ^ c) ^ b ^ c == a
-  *c = *a ^ *b ^ *c; // c = (a ^ b ^ c) ^ a ^ c == b
-  *a = *a ^ *b ^ *c; // a = (a ^ b ^ c) ^ a ^ b == c
+void swap3(int *a, int *b, int *c) {
+ // a -> b, b -> c, c -> a
+ *a = *a ^ *b ^ *c;
+ *b = *a ^ *b ^ *c; // b = ( a ^ b ^ c ) ^ b ^ c == a
+ *c = *a ^ *b ^ *c; // c = ( a ^ b ^ c ) ^ a ^ c == b
+ *a = *a ^ *b ^ *c; // a = ( a ^ b ^ c ) ^ a ^ b == c
 }
 
 // Ejercicio 5
