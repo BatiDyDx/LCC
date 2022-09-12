@@ -1,5 +1,4 @@
-// Ejercicio 1
-// Metodo robusto de calculo de raices cuadraticas
+
 function r = raices_robusto(p)
     a = coeff(p, 2)
     b = coeff(p, 1)
@@ -43,18 +42,32 @@ function v = horner_derivative(p, x)
     end
 endfunction
 
-function y = derivate(f, x, h, n)
+// Derivada con cociente incremental
+function y = derivative_ci(f, x, h, n)
     if n == 0 then
         deff('y = F(x)', 'y = ' + f)
         y = F(x)
     else
-        y = (derivate(f, x + h, h, n - 1) - derivate(f, x, h, n - 1)) / h
+        y = (derivative_ci(f, x + h, h, n - 1) - derivative_ci(f, x, h, n - 1)) / h
     end
 endfunction
 
-function y = taylor(f, x, n)
-    y = 0
-    for k = (0:n)
-        y = y + (derivate(f, 0, 0.0001, k) / factorial(k)) * x ** k
+// Derivada con numderivative
+function y = nderivative(f, v, h, n)
+    deff('y = F(x)', 'y = ' + f)
+    deff('y = D1(v, h)', 'y = numderivative(F, v, h)')
+    for i = 2:n
+      deff('y = D' + string(i) + '(v, h)', 'y = numderivative(D' + string(i - 1) + ', v, h)')
+    end
+    deff('y = D(v, h)', 'y = D' + string(n) + '(v, h)')
+    y = D(v, h)
+endfunction
+
+function y = taylor(f, x, h, n)
+    deff('y = F(x)', 'y =' + f)
+    y = F(0)
+    for k = (1:n)
+        y = y + (nderivative(f, 0, h, k) / factorial(k)) * x ** k
     end
 endfunction
+
