@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 
 // Ejercicio 1
 void ex1() {
@@ -136,7 +137,7 @@ uint_256bits add_256b(uint_256bits x, uint_256bits y) {
   return z;
 }
 
-//Ejercicio 8
+// Ejercicio 8
 uint_256bits mult_256b(uint_256bits x, uint_256bits y) {
   int stop = 0;
   uint_256bits z;
@@ -154,9 +155,9 @@ uint_256bits mult_256b(uint_256bits x, uint_256bits y) {
   return z;
 }
 
-//Ejercicio 9
-#define MANT_F(X) (*( (int*) (&X) ) & 0x007FFFFF) // Mantisa para float
-#define EXP_F(X) ((*( (int*) (&X)) >> 23) & 0x000000FF) // Exponente para float
+// Ejercicio 9
+#define MANT_F(X) (*( (int*) &(X) ) & 0x007FFFFF) // Mantisa para float
+#define EXP_F(X) ((*( (int*) &(X)) >> 23) & 0x000000FF) // Exponente para float
 
 // Ejercicio 10
 // d)
@@ -166,7 +167,8 @@ int myisnan(float f) {
 
 // f)
 int myisinf(float f) {
-  return EXP_F(f) == 0xFF && MANT_F(f) == 0;
+  // Chequea si f es infinito positivo o negativo
+	return EXP_F(f) == 0xFF && MANT_F(f) == 0;
 }
 
 void test_uint256bits() {
@@ -175,6 +177,32 @@ void test_uint256bits() {
   y.n[0] = 0x0001;
   z = add_256b(x, y);
   assert(z.n[0] == 0 && z.n[1] == 1);
+}
+
+// Ejercicio 12
+// a)
+
+#define base 2 // Base
+#define q 30000 // Sesgo
+#define bf 18 // Bits para fraccion
+#define be 16 // Bits para exponente
+
+typedef struct {
+  int sign : 1;
+	unsigned mant : bf;
+	unsigned  exp : be;
+} cfloat; // Custom float
+
+cfloat add_cfloat(cfloat x, cfloat y) {
+  cfloat z;
+	assert(0);
+	return z;
+}
+
+cfloat mult_cfloat(cfloat x, cfloat y) {
+  cfloat z;
+	assert(0);
+  return z;
 }
 
 int main() {
