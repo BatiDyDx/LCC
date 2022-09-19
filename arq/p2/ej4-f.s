@@ -5,5 +5,5 @@ main:
   sall $8, %ebx
   notl %ebx
   andl %ebx, %eax
-  retl
+  ret
 
