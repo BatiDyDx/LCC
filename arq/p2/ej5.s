@@ -16,7 +16,7 @@ main:
 
   #-------------
   sall $16, %edx
-  orq  %edx, %eax
+  orl  %edx, %eax
   #-------------
 
   ret

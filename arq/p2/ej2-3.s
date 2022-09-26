@@ -26,3 +26,4 @@ main:
 	movb $-91, %cl  # N5
 	subb %al, %cl   # S5 = N5 - N2
 
+  ret
