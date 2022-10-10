@@ -21,7 +21,7 @@ main:
   
   # &custom_format
   movq $custom_format, %rdi
-  movq $custom_format, %rsi
+  leaq custom_format, %rsi
   xorq %rax, %rax 
   call printf
 
@@ -33,15 +33,13 @@ main:
   
   # *rsp
   movq $custom_format, %rdi
-  pushq $0xFFFF
   movq (%rsp), %rsi
   xorq %rax, %rax
   call printf
 
   # *(rsp + 8)
   movq $custom_format, %rdi
-  movq 8(%rsp), %rcx
-  movq (%rcx), %rsi
+  movq 8(%rsp), %rsi
   xorq %rax, %rax
   call printf
   
@@ -53,7 +51,7 @@ main:
   
   # &i
   movq $custom_format, %rdi
-  movq $i, %rsi
+  leaq i, %rsi
   xorq %rax, %rax
   call printf
 
