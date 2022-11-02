@@ -29,7 +29,6 @@ disp("Numero de operaciones: ", ops);
 
 endfunction
 
-
 function a = gausselimPP(A,b)
 // La función implementa el método de Eliminación Gaussiana con pivoteo parcial.
 
@@ -85,6 +84,16 @@ function x = solve_lower(A, b)
     for k = 2:n
         x(k) = (b(k) - A(k, 1:k-1) * x(1:k-1)) / A(k, k);
     end
+endfunction
+
+function x = solve(A, b, use_pivot)
+    n = size(A, 1);
+    if use_pivot then
+        a = gausselimPP(A,b);
+    else
+        a = gausselim(A,b);
+    end;
+    x = solve_upper(a(1:n,1:n), a(:,n+1));
 endfunction
 
 function [X, a] = gausselim_multi_sys(A,B)
@@ -217,7 +226,6 @@ function [P, L, U] = gausselimPP_PALU(A)
             U(j,k:n) = U(j,k:n) - L(j,k) * U(k,k:n);
         end
     end
-    
 endfunction
 
 function [L, U] = doolittle(A)
@@ -234,11 +242,31 @@ function [L, U] = doolittle(A)
     L(:,1) = A(:,1) / U(1,1);
     for k = 2:n
         U(k,k:n) = A(k,k:n) - L(k,1:k-1) * U(1:k-1,k:n);
-        for j = k-1:n
+        for j = k+1:n
             L(j, k) = (A(j, k) - L(j,1:k-1) * U(1:k-1,k)) / U(k,k);
+            disp(j, k, L(j, k));
         end
     end
-    // U(n,n) = A(n,n) - L(n,1:n-1) * U(1:n-1,n);
+endfunction
+
+function [L, U] = crout(A)
+    [n, m] = size(A);
+    if n<>m then
+        error('crout - La matriz A debe ser cuadrada');
+        abort;
+    end;
+    
+    L = zeros(n, n);
+    U = eye(n, n);
+    
+    L(:,1) = A(:,1);
+    U(1,:) = A(1,:) / L(1,1);
+    for k = 2:n
+        L(k:n,k) = A(k:n,k) - L(k:n,1:k-1) * U(1:k-1,k);
+        for j = k+1:n
+            U(k,j) = (A(k,j) - L(k,1:j-1) * U(1:j-1,j)) / L(k,k);
+        end
+    end
 endfunction
 
 function [Q, R] = QR(A)
