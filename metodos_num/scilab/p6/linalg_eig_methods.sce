@@ -4,7 +4,7 @@ function circ(r,x,y)
 endfunction
 
 // Retorna las dimensiones del rectangulo a dibujar
-function [mx my Mx My] = gers(A)
+function [mx, my, Mx, My] = gers(A)
     [n,m] = size(A);
     centros = diag(A);
     radios = sum(abs(A),'c') - abs(centros) ;

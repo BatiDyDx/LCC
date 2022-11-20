@@ -25,7 +25,7 @@ for k=1:n-1
     end;
 end;
 
-disp("Numero de operaciones: ", ops);
+printf("Numero de operaciones: %d\n", ops);
 
 endfunction
 
@@ -66,7 +66,7 @@ for k=1:n-1
     end;
 end;
 
-disp("Numero de operaciones: ", ops);
+printf("Numero de operaciones: %d\n", ops);
 
 endfunction
 
@@ -132,7 +132,7 @@ for i = n-1:-1:1
     ops = ops + (m * (n - i) * 2 + 2);
 end;
 
-disp("Numero de operaciones: ", ops);
+printf("Numero de operaciones: %d\n", ops);
 
 endfunction
 
@@ -147,26 +147,26 @@ function B = inverse_gauss(A)
 endfunction
 
 function x = gausselim_det(A)
-[nA,mA] = size(A)
+    [nA,mA] = size(A)
 
-if nA<>mA then
-    error('gausselim_det - La matriz A debe ser cuadrada');
-    abort;
-end;
-
-// Contador de operaciones
-ops = 0;
-
-// Eliminación progresiva
-n = nA;
-for k=1:n-1
-    for i=k+1:n
-        A(i,k+1:n) = A(i,k+1:n) - (A(i,k)/A(k,k)) * A(k,k+1:n);
-        A(i,k) = 0;
+    if nA<>mA then
+        error('gausselim_det - La matriz A debe ser cuadrada');
+        abort;
     end;
-end;
 
-x = prod(diag(A));
+    // Contador de operaciones
+    ops = 0;
+
+    // Eliminación progresiva
+    n = nA;
+    for k=1:n-1
+        for i=k+1:n
+            A(i,k+1:n) = A(i,k+1:n) - (A(i,k)/A(k,k)) * A(k,k+1:n);
+            A(i,k) = 0;
+        end;
+    end;
+
+    x = prod(diag(A));
 endfunction
 
 function [x, a] = gausselim_tridiag(A, b)
@@ -193,7 +193,7 @@ function [x, a] = gausselim_tridiag(A, b)
         x(k) = (b(k) - a(k,k+1) * x(k+1)) / a(k,k);
     end
     ops = ops + (n - 1) * 3;
-    disp("Numero de operaciones: ", ops);
+    printf("Numero de operaciones: %d\n", ops);
 endfunction
 
 function [P, L, U] = gausselimPP_PALU(A)
@@ -244,10 +244,54 @@ function [L, U] = doolittle(A)
         U(k,k:n) = A(k,k:n) - L(k,1:k-1) * U(1:k-1,k:n);
         for j = k+1:n
             L(j, k) = (A(j, k) - L(j,1:k-1) * U(1:k-1,k)) / U(k,k);
-            disp(j, k, L(j, k));
         end
     end
 endfunction
+
+function [L, U, P] = doolittle_pivoting(A)
+    [n, m] = size(A);
+    if n<>m then
+        error('doolittle_pivoting - La matriz A debe ser cuadrada');
+        abort;
+    end;
+    
+    L = eye(n, n);
+    U = zeros(n, n);
+    // P = eye(n,n);
+    /*
+    kpivot = 1; amax = abs(A(1,1));  //pivoteo
+    for i=2:n
+        if abs(A(i,1))>amax then
+            kpivot = i; amax = A(i,1);
+        end;
+    end;
+    temp = A(kpivot,:); A(kpivot,:) = A(1,:); A(1,:) = temp;
+    temp = P(kpivot,:); P(kpivot,:) = P(1,:); P(1,:) = temp;
+    */
+    U(1,:) = A(1,:);
+    if U(1,1) <> 0 then
+        L(:,1) = A(:,1) / U(1,1);
+    end
+    for k = 2:n
+        /*
+        kpivot = 1; amax = abs(A(k,k));  //pivoteo
+        for i=k+1:n
+            if abs(A(i,k))>amax then
+                kpivot = i; amax = A(i,k);
+            end;
+        end;
+        temp = A(kpivot,:); A(kpivot,:) = A(k,:); A(k,:) = temp;
+        temp = P(kpivot,:); P(kpivot,:) = P(k,:); P(k,:) = temp;
+        */
+        U(k,k:n) = A(k,k:n) - L(k,1:k-1) * U(1:k-1,k:n);
+        if U(k,k) <> 0 then
+            for j = k+1:n
+                L(j, k) = (A(j, k) - L(j,1:k-1) * U(1:k-1,k)) / U(k,k);
+            end
+       end
+    end
+endfunction
+
 
 function [L, U] = crout(A)
     [n, m] = size(A);

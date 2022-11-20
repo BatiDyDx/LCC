@@ -31,9 +31,9 @@ for k = 2:n
         ind = 0
         return
     end
-    U(k,k) = sqrt(t)
+    U(k,k) = sqrt(t);
     for j = k+1:n
-        U(k,j) = ( A(k,j) - U(1:k-1,k)'*U(1:k-1,j) )/U(k,k)
+        U(k,j) = ( A(k,j) - U(1:k-1,k)' * U(1:k-1,j) )/U(k,k)
     end
 end
 ind = 1

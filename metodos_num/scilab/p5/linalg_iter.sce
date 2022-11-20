@@ -5,7 +5,7 @@ function x = jacobi(A, b, x0, tol, iters)
         x(i) = (b(i) - A(i,1:i-1) * x0(1:i-1) - A(i,i+1:n) * x0(i+1:n)) / A(i,i)
     end
     x(n) = (b(n) - A(n,1:n-1) * x0(1:n-1)) / A(n,n)
-    m = 0
+    m = 1;
     while norm(x - x0, 2) > tol && m < iters
         x0 = x
         x(1) = (b(1) - A(1,2:n) * x0(2:n)) / A(1,1)
@@ -19,6 +19,7 @@ function x = jacobi(A, b, x0, tol, iters)
         disp("Numero de iteraciones excedido");
     end
     disp("Numero de iteraciones", m);
+    disp("Error: ", norm(x - x0));
 endfunction
 
 function x = gauss_seidel(A, b, x0, tol, iters)
@@ -30,7 +31,7 @@ function x = gauss_seidel(A, b, x0, tol, iters)
         x(i) = (b(i) - A(i,1:i-1) * x(1:i-1) - A(i,i+1:n) * x(i+1:n)) / A(i,i);
     end
     x(n) = (b(n) - A(n,1:n-1) * x(1:n-1)) / A(n,n);
-    m = 0
+    m = 1;
     while norm(x - x0, 2) > tol && m < iters
         x0 = x
         x(1) = (b(1) - A(1,2:n) * x(2:n)) / A(1,1);
@@ -44,6 +45,7 @@ function x = gauss_seidel(A, b, x0, tol, iters)
         disp("Numero de iteraciones excedido");
     end
     disp("Numero de iteraciones", m);
+    disp("Error: ", norm(x - x0));
 endfunction
 
 // Chequea si las condiciones de para la convergencia de los metodos iterativos
@@ -62,6 +64,19 @@ function [b1, b2] = check_conditions_convergence(A, p)
     b2 = norm(eye(n,n) - (N2 ** -1) * A, p) < 1;
 endfunction
 
+// Parametro w optimo para matrices tridiagonales
+function w = optimal_w(A)
+    n = size(A, 1);
+    D_inv = zeros(n,n);
+    for i = 1:n
+        D_inv = 1 / A(i,i);
+    end
+    T = eye(A) - D_inv * A;
+    p = max(abs(spec(T)));
+    disp(p)
+    w = 2 / (1 + sqrt(1 - p ** 2));
+endfunction
+
 function x = SOR(A, b, x0, w, tol, iters)
     n = size(A, 1)
     s = zeros(n, 1)
@@ -71,7 +86,7 @@ function x = SOR(A, b, x0, w, tol, iters)
         x(i) = (1 - w) * x0(i) + (b(i) - A(i,1:i-1) * x(1:i-1) - A(i,i+1:n) * x(i+1:n)) * (w / A(1,1));
     end
     x(n) = (1 - w) * x0(n) + (b(n) - A(n,1:n-1) * x(1:n-1)) * (w / A(n,n));
-    m = 0
+    m = 1;
     while norm(x - x0, 2) > tol && m < iters
         x0 = x
         x(1) = (1 - w) * x0(1) + (b(1) - A(1,2:n) * x0(2:n)) * (w / A(1,1));
@@ -79,10 +94,11 @@ function x = SOR(A, b, x0, w, tol, iters)
             x(i) = (1 - w) * x0(i) + (b(i) - A(i,1:i-1) * x(1:i-1) - A(i,i+1:n) * x(i+1:n)) * (w / A(1,1));
         end
         x(n) = (1 - w) * x0(n) + (b(n) - A(n,1:n-1) * x(1:n-1)) * (w / A(n,n));
-        m = m + 1
+        m = m + 1;
     end
     if m == iters then
         disp("Numero de iteraciones excedido");
     end
     disp("Numero de iteraciones", m);
+    disp("Error: ", norm(x - x0));
 endfunction
