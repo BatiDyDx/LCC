@@ -3,8 +3,8 @@
 
 .global det22
 det22:
-  mul r0, r0, r3  @ r0 = a * d
-  mul r1, r1, r2  @ r1 = b * c
-  sub r0, r0, r1  @ r0 = a * d - b * c
+  vmul.f32 s0, s0, s3  @ s0 = a * d
+  vmul.f32 s1, s1, s2  @ s1 = b * c
+  vsub.f32 s0, s0, s1  @ s0 = a * d - b * c
   bx lr
 

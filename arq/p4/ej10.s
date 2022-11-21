@@ -1,5 +1,5 @@
-.global exp
-exp:
+.global exp2
+exp2:
   mov r1, #1
   mov r0, r1, LSL r0
   bx lr
