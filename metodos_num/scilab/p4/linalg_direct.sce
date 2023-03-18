@@ -248,51 +248,6 @@ function [L, U] = doolittle(A)
     end
 endfunction
 
-function [L, U, P] = doolittle_pivoting(A)
-    [n, m] = size(A);
-    if n<>m then
-        error('doolittle_pivoting - La matriz A debe ser cuadrada');
-        abort;
-    end;
-    
-    L = eye(n, n);
-    U = zeros(n, n);
-    // P = eye(n,n);
-    /*
-    kpivot = 1; amax = abs(A(1,1));  //pivoteo
-    for i=2:n
-        if abs(A(i,1))>amax then
-            kpivot = i; amax = A(i,1);
-        end;
-    end;
-    temp = A(kpivot,:); A(kpivot,:) = A(1,:); A(1,:) = temp;
-    temp = P(kpivot,:); P(kpivot,:) = P(1,:); P(1,:) = temp;
-    */
-    U(1,:) = A(1,:);
-    if U(1,1) <> 0 then
-        L(:,1) = A(:,1) / U(1,1);
-    end
-    for k = 2:n
-        /*
-        kpivot = 1; amax = abs(A(k,k));  //pivoteo
-        for i=k+1:n
-            if abs(A(i,k))>amax then
-                kpivot = i; amax = A(i,k);
-            end;
-        end;
-        temp = A(kpivot,:); A(kpivot,:) = A(k,:); A(k,:) = temp;
-        temp = P(kpivot,:); P(kpivot,:) = P(k,:); P(k,:) = temp;
-        */
-        U(k,k:n) = A(k,k:n) - L(k,1:k-1) * U(1:k-1,k:n);
-        if U(k,k) <> 0 then
-            for j = k+1:n
-                L(j, k) = (A(j, k) - L(j,1:k-1) * U(1:k-1,k)) / U(k,k);
-            end
-       end
-    end
-endfunction
-
-
 function [L, U] = crout(A)
     [n, m] = size(A);
     if n<>m then
@@ -313,15 +268,15 @@ function [L, U] = crout(A)
     end
 endfunction
 
-function [Q, R] = QR(A)
+function [Q, R] = qr_factor(A)
     [n, m] = size(A);
     if n < m then
-        error('QR - La matriz A no cumple con las dimensiones');
+        error('qr_factor - La matriz A no cumple con las dimensiones');
         abort;
     end
     R(1,1) = norm(A(:,1), 2);
     Q(:,1) = A(:,1) / R(1,1);
-    for k = 2:n
+    for k = 2:m
         Q(:,k) = A(:,k);
         for i = 1:k-1
             R(i, k) = A(:,k)' * Q(:,i)
@@ -380,6 +335,7 @@ function x = solve_chol(A, b)
 endfunction
 
 function x = solve_QR(A, b)
-    [Q, R] = QR(A);
+    [Q, R] = qr_factor(A);
     x = solve_upper(R, Q' * b);
 endfunction
+

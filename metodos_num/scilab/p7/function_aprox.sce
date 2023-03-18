@@ -1,51 +1,63 @@
-// Coeficientes de la funcion f(x) = a1 + a2 * x
-// donde f es la mejor aproximacion por minimos cuadrados lineal
-function a = linear_min_squares(x, y)
-    s0 = length(x);
-    s1 = sum(x);
-    s2 = sum(x .^ 2);
-    
-    m0 = sum(y);
-    m1 = sum(y .* x);
-    C = [s0, s1; s1, s2];
-    b = [m0; m1];
-    a = solve(C, b, %f); // solve se halla en linalg_direct.sce
+function T = chebyshev(n)
+    s = poly(0, "x", "r");
+    T0 = poly(1, "x", "c");
+    T1 = s
+    T = T0;
+    for k = 1:n
+        T0 = T1;
+        T1 = 2 * s * T0 - T;
+        T = T0;
+    end
 endfunction
 
-function a = square_min_squares(x, y)
-    s0 = length(x);
-    s1 = sum(x);
-    s2 = sum(x .^ 2);
-    s3 = sum(x .^ 3);
-    s4 = sum(x .^ 4);
-
-    m0 = sum(y);
-    m1 = sum(y .* x);
-    m2 = sum(y .* x .* x);
-    C = [s0, s1 s2; s1, s2, s3; s2, s3, s4];
-    b = [m0; m1; m2];
-    a = solve(C, b, %f);
+function x = chebyshev_roots(n)
+    if n == 0 then
+        return [];
+    end
+    for k = 1:n do
+        theta = (2 * k - 1) * %pi / (2 * n);
+        x(k) = cos(theta);
+    end
 endfunction
 
-function a = cube_min_squares(x, y)
-    s0 = length(x);
-    s1 = sum(x);
-    s2 = sum(x .^ 2);
-    s3 = sum(x .^ 3);
-    s4 = sum(x .^ 4);
-    s5 = sum(x .^ 5);
-    s6 = sum(x .^ 6);
-    
-    m0 = sum(y);
-    m1 = sum(y .* x);
-    m2 = sum(y .* (x .^ 2));
-    m3 = sum(y .* (x .^ 3));
-    
-    C = [s0, s1, s2, s3;
-         s1, s2, s3, s4;
-         s2, s3, s4, s5;
-         s3, s4, s5, s6];
-    
-    b = [m0; m1; m2; m3];
-    a = solve(C, b, %f);
+function x = chebyshev_roots_general(a, b, n)
+    x = chebyshev_roots(n);
+    x = ((b + a) + x * (b - a)) / 2;
+endfunction
+
+function p = interpolate_chebyshev(f, n)
+    deff("y = F(x)", "y = " + f);
+    x = chebyshev_roots(n);
+    y = zeros(n, 1);
+    for k = 1:n do
+        y(k) = F(x(k));
+    end
+    p = interpolation_poly(x, y);
+endfunction
+
+// Coeficienets de aproximacion de minimos cuadrados de orden n
+function a = min_squares(x, y, k)
+    n = length(x);
+    A = ones(n, 1);
+    for j = 2:k+1 do
+        A(1:n,j) = A(1:n,j-1) .* x;
+    end
+    if n == k+1 then
+        a = solve_QR(A, y);
+    else
+        a = solve(A' * A, A' * y, %t);
+    end
+endfunction
+
+// Polinomio obtenido de la aproximacion de minimos cuadrados de orden n
+function p = min_squares_poly(x, y, k)
+    a = min_squares(x, y, k);
+    p = poly(a, "x", "c");
+endfunction
+
+// f es string y p es polinomio
+function plot_error(f, p, a, b)
+    deff("y = F(x)", "y = " + f);
+    x = linspace(a, b, 500);
+    plot2d(x, F(x) - horner(p, x));
 endfunction

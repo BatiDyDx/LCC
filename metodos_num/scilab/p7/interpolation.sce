@@ -42,10 +42,10 @@ endfunction
 
 function p = interpolation_poly(x, y)
     n = length(x);
-    p = poly(0, "x");
-    z = DD(x,y);
+    s = poly(0, "x");
+    p = DD(x,y);
     for k = n-1:-1:1
-        z = z * (p - x(k)) + DD(x(1:k), y(1:k));
+        p = p * (s - x(k)) + DD(x(1:k), y(1:k));
     end
 endfunction
 

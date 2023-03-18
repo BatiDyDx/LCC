@@ -66,7 +66,7 @@ void ej10() {
     char textoB[30] = "El Cuarteto de Nos"; 
     char *p = textoA;
     char *q = textoB;
-    printf ("textoA : %s\ntextoB : %s\n", textoA , textoB ) ;
+    printf("textoA : %s\ntextoB : %s\n", textoA , textoB);
     /*
     *p asume el valor de *q, luego se incrementan ambos y se
     repite, hasta que se encuentra el valor '\0', el cual detiene el while

@@ -122,6 +122,8 @@ void filecopy(FILE *ifp, FILE *ofp) {
 
 int countLines(char *filename) {
     FILE *fp = fopen(filename, "r");
+    if (fp == NULL) { perror("File Error"); exit(1);}
+
     int lines_number = 1;
     char c;
     while ((c = fgetc(fp)) != EOF) {
@@ -139,7 +141,7 @@ char** readLines(char *filename, int nlines) {
     char *line = malloc(sizeof(char) * (MAX_CHARS_LINE+1));
     if (line == NULL) {perror("Malloc error in line pointer"); exit(1);}
 
-    for (int i = 0; i < nlines-1; i++) {
+    for (int i = 0; i < nlines; i++) {
         fgets(line, MAX_CHARS_LINE+1, fp);
         if (line == NULL) {
             perror("Error in fgets");
@@ -217,7 +219,7 @@ int main() {
         perror("Error in main");
         exit(1);
     }
-    for (int i = 0; i < nlines-1; i++) {
+    for (int i = 0; i < nlines; i++) {
         printf("Line number %d:\t%s\n", i, lines[i]);
         free(lines[i]);
     }

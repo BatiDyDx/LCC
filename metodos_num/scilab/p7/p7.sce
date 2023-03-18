@@ -21,8 +21,8 @@ eps = 1; // |J_0(x)| <= 1
 p = interpolation_poly(x, y);
 printf("Interpolacion en 2.15: %lf\n", horner(p, 2.15));
 printf("Interpolacion en 2.35: %lf\n", horner(p, 2.35));
-printf("Error maximo cometido (p = 2.15): %lf\n", interpolation_error(2.15, x, eps));
-printf("Error maximo cometido (p = 2.35): %lf\n", interpolation_error(2.35, x, eps));
+printf("Error maximo cometido (p = 2.15): %.10lf\n", interpolation_error(2.15, x, eps));
+printf("Error maximo cometido (p = 2.35): %.10lf\n", interpolation_error(2.35, x, eps));
 
 
 // Ejercicio 7
@@ -30,45 +30,67 @@ x = [0 0.15 0.31 0.5 0.6 0.75]';
 y = [1 1.004 1.31 1.117 1.223 1.422]';
 
 // Minimos cuadrados lineal
-a1 = linear_min_squares(x,y);
+p1 = min_squares_poly(x, y, 1);
 
 // Minimos cuadrados cuadratico
-a2 = square_min_squares(x,y);
+p2 = min_squares_poly(x, y, 2);
 
 // Minimos cuadrados cubico
-a3 = cube_min_squares(x,y);
+p3 = min_squares_poly(x, y, 3);
 
-// Funciones de minimos cuadrados obtenidas
-deff("y = f1(x)", "y = a1(1) + a1(2) * x");
-deff("y = f2(x)", "y = a2(1) + a2(2) * x + a2(3) * x .^ 2");
-deff("y = f3(x)", "y = a3(1) + a3(2) * x + a3(3) * x .^ 2 + a3(4) * x .^ 3");
-
-printf("Error de la aproximacion lineal: %lf\n", sum(abs(y - f1(x))));
-printf("Error de la aproximacion cuadratica: %lf\n", sum(abs(y - f2(x))));
-printf("Error de la aproximacion cubica: %lf\n", sum(abs(y - f3(x))));
+printf("Error de la aproximacion lineal: %lf\n", sum(abs(y - horner(p1, x))));
+printf("Error de la aproximacion cuadratica: %lf\n", sum(abs(y - horner(p2, x))));
+printf("Error de la aproximacion cubica: %lf\n", sum(abs(y - horner(p3, x))));
 
 // Ejercicio 8
 x = [4 4.2 4.5 4.7 5.1 5.5 5.9 6.3 6.8 7.1]';
 y = [102.56 113.18 130.11 142.05 167.53 195.14 224.87 256.73 299.5 326.72]';
 
-a1 = linear_min_squares(x,y);
-a2 = square_min_squares(x,y);
-a3 = cube_min_squares(x,y);
+p1 = min_squares_poly(x, y, 1);
+p2 = min_squares_poly(x, y, 2);
+p3 = min_squares_poly(x, y, 3);
+
+function ej8()
+    xaxis = linspace(x(1), x(10), 500)';
+    // Nota: La aproximacion de orden 2 y 3 son casi indistinguibles sin zoom
+    plot2d(xaxis, [horner(p1, xaxis), horner(p2, xaxis), horner(p3, xaxis)]);
+    scatter(x, y);
+endfunction
 
 
 // Ejercicio 9
-deff("y = f(x)", "y = 1 ./ (1 + x .^ 2)");
-n = [2 4 6 10 14]';
-
-a = -5; b = 5;
-for j = 1:length(n) do
-    x = linspace(a, b, n(j));
+function ej9(n)
+    a = -5; b = 5;
+    deff("y = f(x)", "y = 1 ./ (1 + x .^ 2)");
+    x = linspace(a, b, n)';
     p = interpolation_poly(x, f(x));
-    x = linspace(a, b, 1000);
-    y = zeros(1000, 1); // vector de errores: y = f(x) - p(x)
-    for i = 1:1000 do
-        y(i) = f(x(i)) - horner(p, x(i));
-    end
+    x = linspace(a, b, 1000)';
+    y = f(x) - horner(p, x);
+    // plot2d(x, [f(x) horner(p, x)])
     plot2d(x, y);
+endfunction
+
+
+// Ejercicio 10
+k = 4;
+f = "exp(x)";
+p = interpolate_chebyshev(f, k);
+
+plot_error(f, p, -1, 1);
+x = linspace(-1, 1, 500)';
+// plot2d(x, F(x) - horner(p, x));
+
+
+
+// Ejercicio 11
+a = 0; b = %pi/2;
+n = 3;
+
+g = "cos(x)";
+x = raices_chebyshev(4);
+for j = 1:4 do
+    x(j) = ((b + a) + x(j) * (b - a)) / 2;
+    y(j) = cos(x(j));
 end
 
+p = interpolation_poly(x, y);
