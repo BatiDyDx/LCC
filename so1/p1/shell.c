@@ -145,18 +145,25 @@ int main() {
           close(READ_END(filedes, i));
           dup2(WRITE_END(filedes, i), STDOUT_FILENO);
         }
+        for (int j = 0; j < 2 * cmd.npipes; j++)
+          close(filedes[j]);
         if (i == nprocs - 1) // If this is the last process of the pipe, check if output is redirected
           redir_path = cmd.redir_path;
         handle_cmd(ith_process_cmd(cmd, i), redir_path);
       }
     }
 
+    for (int j = 0; j < 2 * cmd.npipes; j++)
+      close(filedes[j]);
+
     // TODO use static memory to avoid memory leaking
     free(input);
     free(cmd.args);
     free(filedes);
+
     int status;
-    waitpid(pids[nprocs - 1], &status, 0);
+    for (int i = 0; i < nprocs; i++)
+      waitpid(pids[i], &status, 0);
     free(pids);
     // TODO check wait status of the commands
   }
