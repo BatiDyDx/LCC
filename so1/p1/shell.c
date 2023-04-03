@@ -11,18 +11,22 @@ typedef struct _A_Cmd {
   char** toks;
   unsigned len;
   char* redir_path; // Path to redirect output of command, NULL if no redirection is specified;
-} *Atomic_Cmd;
+} *AtomicCmd;
 
 typedef struct _Cmd {
-  Atomic_Cmd* atoms; // Atomic commands 
+  AtomicCmd* atoms; // Atomic commands 
   unsigned char nprocs; // Number of processes (equal to length of atoms array)
 } *Cmd;
 
 #define ATOMS_SIZE 3
 #define TOKS_SIZE 5
 
-#define TOKEN_IS_PIPE(tok) (tok != NULL && !strcmp(tok, "|"))
-#define TOKEN_IS_REDIR(tok) (tok != NULL && !strcmp(tok, ">"))
+#define REDIR ">"
+#define PIPE "|"
+#define EXIT "exit"
+
+#define IS_TOKEN(s, tok) (s != NULL && !strcmp(s, tok))
+
 #define ABORT(msg) do {\
             fprintf(stderr, "[ERROR]: %s\n", msg);\
             exit(EXIT_FAILURE);\
@@ -37,17 +41,15 @@ typedef struct _Cmd {
 #define READ_END(filedes, i) filedes[2 * (i)]
 #define WRITE_END(filedes, i) filedes[2 * (i) + 1]
 
-const char* const EXIT_TOKEN = "exit";
-
 void show_prompt() {
   printf("> ");
 }
 
-Atomic_Cmd create_atomcmd(char** toks, unsigned len) {
-  Atomic_Cmd atom = malloc(sizeof(struct _A_Cmd));
+AtomicCmd create_atomcmd(char** toks, unsigned len) {
+  AtomicCmd atom = malloc(sizeof(struct _A_Cmd));
   assert(atom != NULL);
 
-  if (len >= 3 && TOKEN_IS_REDIR(toks[len - 2])) {
+  if (len >= 3 && IS_TOKEN(toks[len - 2], REDIR)) {
     toks[len - 2] = NULL;
     atom->redir_path = toks[len - 1];
     len -= 2; // Shorten the args list up to the last argumen before >
@@ -79,9 +81,9 @@ char* get_input() {
   return input;
 }
 
-void add_atomic(Cmd cmd, Atomic_Cmd atom) {
+void add_atomic(Cmd cmd, AtomicCmd atom) {
   if (cmd->nprocs % ATOMS_SIZE == 0) {
-    cmd->atoms = realloc(cmd->atoms, sizeof(Atomic_Cmd) * (cmd->nprocs + ATOMS_SIZE));
+    cmd->atoms = realloc(cmd->atoms, sizeof(AtomicCmd) * (cmd->nprocs + ATOMS_SIZE));
     assert(cmd->atoms != NULL);
   }
   cmd->atoms[cmd->nprocs++] = atom;
@@ -89,12 +91,12 @@ void add_atomic(Cmd cmd, Atomic_Cmd atom) {
 
 Cmd parse(char* input) {
   size_t toks_len = 1;
-  Atomic_Cmd atom;
+  AtomicCmd atom;
   Cmd cmd = malloc(sizeof(struct _Cmd));
   assert(cmd != NULL);
 
   cmd->nprocs = 0;
-  cmd->atoms = malloc(sizeof(Atomic_Cmd) * ATOMS_SIZE);
+  cmd->atoms = malloc(sizeof(AtomicCmd) * ATOMS_SIZE);
   assert(cmd->atoms != NULL);
 
   char** toks = malloc(sizeof(char*) * (TOKS_SIZE + 1));
@@ -106,7 +108,7 @@ Cmd parse(char* input) {
     if (toks_len % TOKS_SIZE == 0)
       toks = realloc(toks, sizeof(char*) * (toks_len + TOKS_SIZE + 1));
     toks[toks_len++] = tmp;
-    if (TOKEN_IS_PIPE(tmp)) {
+    if (IS_TOKEN(tmp, PIPE)) {
       atom = create_atomcmd(toks, toks_len - 1);
       add_atomic(cmd, atom);
       toks = malloc(sizeof(char*) * (TOKS_SIZE + 1));
@@ -124,10 +126,12 @@ Cmd parse(char* input) {
 int cmd_is_exit(Cmd cmd) {
   // TODO Improve exit condition
   return cmd->nprocs > 0 && cmd->atoms[0]->len > 0 &&
-          !strcmp(cmd->atoms[0]->toks[0], EXIT_TOKEN);
+         IS_TOKEN(cmd->atoms[0]->toks[0], EXIT);
 }
 
-void exec_atomic(Atomic_Cmd acmd) {
+void exec_atomic(AtomicCmd acmd) {
+  if (acmd->len == 0)
+    ABORT("Invalid command of length 0");
   if (acmd->redir_path != NULL) {
     close(STDOUT_FILENO);
     open(acmd->redir_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -136,7 +140,7 @@ void exec_atomic(Atomic_Cmd acmd) {
   ABORT("Command not found");
 }
 
-void free_atomic(Atomic_Cmd ac) {
+void free_atomic(AtomicCmd ac) {
   free(ac->toks);
   free(ac);
 }
