@@ -7,7 +7,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
-#include <poll.h>
 
 #ifndef FD_COPY
 #include <string.h>
@@ -25,8 +24,7 @@
  *      CHAU
  */
 
-void quit(char *s)
-{
+void quit(char *s) {
 	perror(s);
 	abort();
 }
@@ -228,11 +226,16 @@ int mk_lsock() {
 	return lsock;
 }
 
-int main()
-{
+int main() {
+	/*
+	 * Notar que esta implementacion si bien varios clientes pueden estar
+	 * conectados al servidor al mismo tiempo, la forma en que se
+	 * responde a estos es secuencial
+	 */
 	int lsock;
   
 	lsock = mk_lsock();
 	wait_for_clients_select(lsock);
+	close(lsock);
 }
 
