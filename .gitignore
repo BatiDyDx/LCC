@@ -2,8 +2,9 @@
 # Ignorar todos
 *
 
-# Incluir todos los archivos con extension 
+# Incluir todos los archivos con extension y Makefiles
 !*.*
+!Makefile
 
 # Incluir todos los directorios
 !*/
