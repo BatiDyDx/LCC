@@ -1,2 +1,2 @@
-# LCC-Repo
-Repositorio con archivos de la Lic. en Ciencias de la Computacion - FCEIA - UNR
+# Repositorio Lcciano
+Repositorio de practicas de la Lic. en Ciencias de la Computacion - FCEIA - UNR
