@@ -8,5 +8,5 @@ BIN = bin
 
 .PHONY: clean
 clean:
-	@rm -r $(BIN) 2> /dev/null || true
+	@rm $(BIN)/* 2> /dev/null || true
 

@@ -6,11 +6,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
-#include <sys/mman.h>
 #include <fcntl.h>
 
 #define MAX_EVENTS 10
-#define SHMEM_FILE "ej10_shm"
 
 void quit(char *s) {
   perror(s);
@@ -29,14 +27,7 @@ void quit(char *s) {
  */
 
 
-int *n;
-
-int init_shm(size_t memsize) {
-  int fd = shm_open(SHMEM_FILE, O_RDWR | O_CREAT, 0664);
-  ftruncate(fd, memsize);
-
-  return fd;
-}
+int U = 0;
 
 int fd_readline(int fd, char *buf) {
   int rc;
@@ -59,45 +50,35 @@ int fd_readline(int fd, char *buf) {
   return i;
 }
 
-void handle_conn(int csock) {
+int handle_conn(int csock) {
   char buf[200];
   int rc;
 
-  while (1) {
-    /* Atendemos pedidos, uno por linea */
-    rc = fd_readline(csock, buf);
-    if (rc < 0)
-      quit("read... raro");
-  
-    if (rc == 0) {
-      /* linea vacia, se cerró la conexión */
-      close(csock);
-      return;
-    }
-  
-    if (!strcmp(buf, "NUEVO")) {
-      char reply[20];
-      sprintf(reply, "%d\n", *n);
-      (*n)++;
-      write(csock, reply, strlen(reply));
-    } else if (!strcmp(buf, "CHAU")) {
-      fflush(stdout);
-      close(csock);
-      return;
-    }
+  /* Atendemos pedidos, uno por linea */
+  rc = fd_readline(csock, buf);
+  if (rc < 0)
+    quit("read... raro");
+
+  if (rc == 0)
+    return 1;
+
+  if (!strcmp(buf, "NUEVO")) {
+    char reply[20];
+    sprintf(reply, "%d\n", U++);
+    write(csock, reply, strlen(reply));
+  } else if (!strcmp(buf, "CHAU")) {
+    fflush(stdout);
+    return 1;
   }
+  return 0;
 }
 
 void wait_for_clients_epoll(int lsock) {
 
   struct epoll_event ev, events[MAX_EVENTS];
-  int conn_sock, nfds, epollfd, shmfd;
+  int conn_sock, nfds, epollfd;
 
   size_t memsize = sizeof(unsigned);
-
-  shmfd = init_shm(memsize);
-  n = mmap(NULL, memsize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
-  *n = 0;
 
   epollfd = epoll_create1(0);
   if (epollfd == -1) {
@@ -120,24 +101,22 @@ void wait_for_clients_epoll(int lsock) {
     }
     
     for (int i = 0; i < nfds; ++i) {
-      if (events[i].data.fd == lsock) {
+      if (events[i].data.fd == lsock) { // Client waiting to connect
         conn_sock = accept(lsock, NULL, NULL);
         if (conn_sock == -1)
           quit("accept");
-        if (fork() == 0) {
-          handle_conn(conn_sock);
-          munmap(n, memsize);
-          close(shmfd);
-          exit(EXIT_SUCCESS);
+        ev.events = EPOLLIN | EPOLLET;
+        ev.data.fd = conn_sock;
+        epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_sock, &ev);
+      } else { // Client waiting for response
+        conn_sock = events[i].data.fd;
+        if (handle_conn(conn_sock)) { // Returns 1 if client is done
+          epoll_ctl(epollfd, EPOLL_CTL_DEL, conn_sock, NULL);
+          close(conn_sock);
         }
-        close(conn_sock);
       }
     }
   }
-
-  munmap(n, memsize);
-  close(shmfd);
-  shm_unlink(SHMEM_FILE);
   close(epollfd);
 }
 

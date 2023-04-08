@@ -9,14 +9,17 @@ int flag[2];
 
 void handler(int sig) {
   if (sig == SIGUSR1) {
+    signal(SIGUSR1, handler);
     flag[PARENT] = 1;
   } else if (sig == SIGUSR2) {
+    signal(SIGUSR2, handler);
     flag[CHILD] = 1;
   }
 }
 
 void child_process() {
   while (1) {
+    flag[PARENT] = 0;
     printf("Ping!\n");
     kill(getppid(), SIGUSR2);
     while (flag[PARENT] == 0);
@@ -26,6 +29,7 @@ void child_process() {
 void parent_process(pid_t t) {
   while (1) {
     while (flag[CHILD] == 0);
+    flag[CHILD] = 0;
     printf("Pong!\n");
     kill(t, SIGUSR1);
   }

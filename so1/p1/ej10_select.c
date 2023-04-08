@@ -52,35 +52,7 @@ int fd_readline(int fd, char *buf) {
 	return i;
 }
 
-void handle_conn(int csock) {
-	char buf[200];
-	int rc;
-
-	while (1) {
-		/* Atendemos pedidos, uno por linea */
-		rc = fd_readline(csock, buf);
-		if (rc < 0)
-			quit("read... raro");
-
-		if (rc == 0) {
-			/* linea vacia, se cerró la conexión */
-			close(csock);
-			return;
-		}
-
-		if (!strcmp(buf, "NUEVO")) {
-			char reply[20];
-			sprintf(reply, "%d\n", U);
-			U++;
-			write(csock, reply, strlen(reply));
-		} else if (!strcmp(buf, "CHAU")) {
-			close(csock);
-			return;
-		}
-	}
-}
-
-int handle_conn_select(int csock) {
+int handle_conn(int csock) {
 	char buf[200];
 	int rc;
 
@@ -110,24 +82,6 @@ int handle_conn_select(int csock) {
 }
 
 void wait_for_clients(int lsock) {
-	int csock;
-	/* Esperamos una conexión, no nos interesa de donde viene */
-	csock = accept(lsock, NULL, NULL);
-  if (csock < 0)
-    quit("accept");
-
-  pid_t pid = fork();
-  if (pid == 0) {
-    /* Atendemos al cliente */
-    handle_conn(csock);
-    exit(EXIT_SUCCESS);
-  }
-  close(csock);
-	/* Volvemos a esperar conexiones */
-	wait_for_clients(lsock);
-}
-
-void wait_for_clients_select(int lsock) {
 	int csock = 0, close, max_fd = lsock;
   fd_set rfds, rfds_copy;
   FD_ZERO(&rfds);
@@ -152,7 +106,7 @@ void wait_for_clients_select(int lsock) {
 
     for (int i = 0; i <= max_fd; i++) {
       if (FD_ISSET(i, &rfds_copy)) {
-        close = handle_conn_select(i);
+        close = handle_conn(i);
         if (close)
           FD_CLR(i, &rfds);
       }
@@ -185,7 +139,7 @@ void wait_for_clients_epoll(int lsock) {
 
     for (int i = 0; i <= max_fd; i++) {
       if (FD_ISSET(i, &rfds_copy)) {
-        close = handle_conn_select(i);
+        close = handle_conn(i);
         if (close)
           FD_CLR(i, &rfds);
       }
@@ -235,7 +189,7 @@ int main() {
 	int lsock;
   
 	lsock = mk_lsock();
-	wait_for_clients_select(lsock);
+	wait_for_clients(lsock);
 	close(lsock);
 }
 

@@ -1,5 +1,6 @@
 # Lectura de la base de datos
-anorexia <- read.table(file="~/Developer/lcc/pye/anorexia.data", header = TRUE, 
+# setwd("~/lcc/pye")
+anorexia <- read.table(file="anorexia.data", header = TRUE, 
                        sep="", col.names = c("Signo", "Sexo", "Edad", "Num de visitas"),
                        colClasses = c("factor","factor","numeric","numeric"))
 
@@ -22,8 +23,8 @@ class(Edad)
 # 3- integral (1L -son enteros)
 # 4- complex (3+2i - n?meros complejos)
 # 5- character ('a', "hola" - cadenas de caracteres o caracteres)
-# 6- raw (68 6f 6c 61 -que ser?a hola- especifica la variable en bits crudos)
-# Factor es un objeto de datos pero tambi?n es una respuesta posible a class()
+# 6- raw (68 6f 6c 61 -que seria hola- especifica la variable en bits crudos)
+# Factor es un objeto de datos pero tambien es una respuesta posible a class()
 
 
 # Obtener medidas resumen de tablas o columnas. Dependen del tipo de variable
@@ -51,10 +52,10 @@ frec_abs_ac_edad <- cumsum(frec_abs_edad)
 frec_rel_ac_edad <- cumsum(frec_rel_edad) 
 tabla_edad <- cbind(frec_abs_edad, frec_rel_edad, frec_abs_ac_edad, frec_rel_ac_edad)
 
-# Cambiar la representaci?n las "categor?as" de los factores
+# Cambiar la representacion las "categorias" de los factores
 levels(Signo) <- c("Dieta severa", "Hiperactividad", "Uso de laxantes", "Uso de ropa holgada")
 
-# Cruzar variables categ?ricas
+# Cruzar variables categoricas
 tabla_bivariada <- table(Signo, Sexo)
 suma_filas <- apply(tabla_bivariada, 1, sum)
 tabla_bivariada_con_totales_1 <- cbind(tabla_bivariada, suma_filas)

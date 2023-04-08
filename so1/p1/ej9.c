@@ -57,6 +57,7 @@ int main() {
       sleep(1);
       kill(pid, SIGUSR1);
     }
+    // pause() will pause the process until a signal is received
     while (1) { sleep(5); printf("Estoy en el loop del padre\n"); };
   }
   return 0;
